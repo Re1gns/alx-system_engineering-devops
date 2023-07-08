@@ -39,8 +39,8 @@ frontend reigns-frontend-http
 	http-request set-header X-Forwarded-Proto http
         default_backend reigns-backend
 
-frontend reigns-frontend-http
-        bind *:443 ssl crt /etc/haproxy/certs/www.reigns.tech.pem
+frontend reigns-frontend-http-2
+        bind *:443 ssl crt /etc/letsencrypt/live/www.reigns.tech/fullchain.pem
 	http-request set-header X-Forwarded-Proto https
 	default_backend reigns-backend
 
