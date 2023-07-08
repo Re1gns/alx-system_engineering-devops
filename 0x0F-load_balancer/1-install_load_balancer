@@ -1,62 +1,37 @@
 #!/usr/bin/env bash
 # installing a load balancer
 
-# colors
-blue='\e[1;34m'
-brown='\e[0;33m'
-green='\e[1;32m'
-reset='\033[0m'
+# Update package repository
+sudo apt update
 
-echo -e "${blue}Updating and doing some minor checks...${reset}\n"
+# Install HAProxy
+sudo apt install -y haproxy
 
-function install() {
-	command -v "$1" &> /dev/null
+# Configure HAProxy
+sudo tee /etc/haproxy/haproxy.cfg > /dev/null << EOF
+global
+    daemon
+    maxconn 256
 
-	#shellcheck disable=SC2181
-	if [ $? -ne 0 ]; then
-		echo -e "	Installing: ${brown}$1${reset}\n"
-		sudo apt-get update -y -qq && \
-			sudo apt-get install -y "$1" -qq
-		echo -e "\n"
-	else
-		echo -e "	${green}${1} is already installed.${reset}\n"
-	fi
-}
-
-install haproxy #install haproxy
-
-echo -e "\n${blue}Setting up some minor stuff.${reset}\n"
-
-# backup default server config file
-sudo cp /etc/haproxy/haproxy.cfg haproxy_default.backup
-
-server_config=\
-"
 defaults
-  mode http
-  timeout client 15s
-  timeout connect 10s
-  timeout server 15s
-  timeout http-request 10s
+    mode http
+    timeout connect 5000ms
+    timeout client 50000ms
+    timeout server 50000ms
 
-frontend reigns.tech-frontend
+frontend http-in
     bind *:80
-    default_backend reigns.tech-backend
+    default_backend servers
 
-backend reigns.tech-backend
+backend servers
     balance roundrobin
-    server 136272-web-01 34.232.66.200:80 check
-    server 136272-web-02 54.234.82.27:80 check
-"
+    server web-01 34.232.66.200:80
+    server web-02 54.234.82.27:80
+EOF
 
-# shellcheck disable=SC2154
-echo "$server_config" | sudo dd status=none of=/etc/haproxy/haproxy.cfg
+# Enable HAProxy management via init script
+sudo sed -i 's/ENABLED=0/ENABLED=1/' /etc/default/haproxy
 
-# enable haproxy to be started by init script
-echo "ENABLED=1" | sudo dd status=none of=/etc/default/haproxy
-
-if [ "$(pgrep -c haproxy)" -le 0 ]; then
-	sudo service haproxy start
-else
-	sudo service haproxy restart
-fi
+# Start and enable HAProxy
+sudo service haproxy start
+sudo systemctl enable haproxy
