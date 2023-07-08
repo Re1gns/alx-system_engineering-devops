@@ -50,4 +50,3 @@ backend reigns.tech-backend
         server 213667-web-01 34.232.66.200:80 check
         server 213667-web-02 54.234.82.27:80 check
 # end of parameters
-                                                                                                 51,15         Bot
