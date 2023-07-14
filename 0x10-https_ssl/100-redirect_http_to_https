@@ -46,6 +46,6 @@ frontend reigns-frontend-https
 
 backend reigns-backend
         balance roundrobin
-        server 102722-web-01  52.202.243.26 check
-        server 102722-web-02  34.202.159.230 check
+        server 213667-web-01 34.232.66.200:80 check
+        server 213667-web-02 54.234.82.27:80 check
 
