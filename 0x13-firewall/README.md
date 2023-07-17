@@ -1,4 +1,4 @@
-## Task 1 add 'sudo' where necessary
+## Task 1 Add 'sudo' to grant root access where necessary 
 - apt-get install ufw
 - sed -i 's/IPV6=.*/IPV6=yes/' /etc/default/ufw
 - ufw disable
