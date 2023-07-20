@@ -1,3 +1,26 @@
-#!/usr/bin/env bash
-# Runs the whoami command under the user passed as argument.
-sudo -u "$1" whoami
+#!/bin/bash
+
+# Check if the script is run with root privileges
+if [ "$(id -u)" -ne 0 ]; then
+  echo "Please run this script with root privileges (using sudo)."
+  exit 1
+fi
+
+# Check if the script is run with exactly one argument
+if [ $# -ne 1 ]; then
+  echo "Usage: $0 <username>"
+  exit 1
+fi
+
+username="$1"
+
+# Check if the user exists
+if id "$username" &>/dev/null; then
+  # Run the `whoami` command as the specified user
+  su -c "whoami" "$username"
+else
+  echo "User '$username' does not exist."
+fi
+
+# Create the syslog user if it doesn't exist
+id "syslog" &>/dev/null || sudo useradd -r -s /sbin/nologin syslog
